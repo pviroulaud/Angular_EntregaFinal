@@ -1,0 +1,379 @@
+PROYECTO
+ng new pf_viroulaud
+	Yes
+	CSS
+( cd pf_viroulaud )
+ng add @angular/material
+    No
+    Yes
+    IndigoPink (o el tema que sea)
+    Yes
+    Yes
+npm install bootstrap    
+npm install jquery
+    En angular.json agregar los css y js de bootstrap (en buid y mas abajo en tests)
+    "styles": [....
+                "node_modules/bootstrap/dist/css/bootstrap.min.css",
+                ....]
+    "scripts": [
+              "node_modules/jquery/dist/jquery.min.js",
+              "node_modules/@popperjs/core/dist/umd/popper.min.js",
+              "node_modules/bootstrap/dist/js/bootstrap.min.js"
+            ]
+
+MODULOS CORE-FEATURES-SHARED
+ng generate module core --routing
+ng generate module features
+ng generate module shared
+
+MODULO CORE
+ng generate module core/Material --module core
+    Verificar core.module.ts    -> import { MaterialModule } from '../core/material-module/material.module';
+ng generate class core/Clases/Usuario
+ng generate class core/Clases/Curso
+ng generate component core/componentes/home --module core
+ng generate component core/componentes/login --module core
+ng generate component core/componentes/menu --module core
+ng generate component core/componentes/notFound --module core
+ng generate component core/componentes/titleBar --module core
+ng generate component core/componentes/confirmModal --module core
+ng generate service core/serviciosAPI/login
+ng generate service core/serviciosAPI/usuario
+ng generate guard core/auth
+    Marcar todas las opciones (las que no se usen se le clava un return true)
+
+MODULO SHARED
+ng generate pipe shared/pipes/getEdad --module shared
+
+MODULO FEATURES
+ng generate module /features/usuarios --routing
+ng generate module /features/cursos --routing
+ng generate component /features/usuarios/componentes/lista-usuarios --module usuarios
+ng generate component /features/usuarios/componentes/abm-usuario --module usuarios
+ng generate component /features/cursos/componentes/lista-cursos --module cursos
+ng generate component /features/cursos/componentes/abm-curso --module cursos
+    Agregar al CoreModule (Despues del coreRoutingModule)
+        imports[...    
+                UsuariosModule,
+                CursosModule
+                ]
+
+NGRX FEATURES STORE-EFFECTS                
+ng add @ngrx/store
+    Yes
+ng add @ngrx/schematics
+    Yes
+ng add @ngrx/store-devtools
+    Yes    
+ng generate feature core/state/sesionUsuario
+    Yes
+    Yes
+    load (esto se puede cambiar, es solo un prefijo)
+    core (modulo en el que se registrara el STORE)
+ng generate feature core/state/sesionUsuario/sesionUsuario
+    Para no utilizar Effects comentar en el core.module.ts
+        //import { EffectsModule } from '@ngrx/effects';
+        //import { SesionUsuarioEffects } from './state/sesionUsuario/sesion-usuario.effects'; 
+        ...
+        //EffectsModule.forFeature([SesionUsuarioEffects])
+    Agregar en core.module.ts
+        import { reducer, sesionUsuarioFeatureKey } from './state/sesionUsuario/sesion-usuario.reducer';
+        import { StoreModule } from '@ngrx/store';
+        ...
+        imports:[
+            ...
+            StoreModule.forFeature(sesionUsuarioFeatureKey, reducer) 
+        ]
+
+ROUTING DE LA APLICACION
+app.routing.module.ts
+    const routes: Routes = [{
+                            path: '', 
+                            loadChildren: () => import('./core/core.module').then((m) => m.CoreModule)
+                            }
+                            ];
+core.routing.module.ts
+    const routes: Routes = [
+
+                            {path: '', component: LoginComponent},
+                            {path: 'login', component: LoginComponent, pathMatch: 'full'},    
+                            
+                            {path:'home' ,redirectTo:'/home/usuarios',pathMatch: 'full'},
+
+                            {path: 'home', component: HomeComponent, //canActivate: [AuthGuard],  
+                            children: [
+                                {path:'usuarios', loadChildren: () => import('../features/usuarios/usuarios.module').then((m) => m.UsuariosModule)}
+                            ]}
+                            
+                            ,
+                            {path: '**', component: NotFoundComponent, pathMatch: 'full'}
+                            ];                            
+usuarios-routing.module.ts
+    const routes: Routes = [
+                            {path: '',component:ListaUsuariosComponent,//canActivate: [AuthGuard],
+                                children: [
+                                            {
+                                            path:'lista', component:ListaUsuariosComponent,//canActivate: [AuthGuard]
+                                            }
+                                        ]
+                            },
+                            ]
+
+En el core.module.ts
+    import { ReactiveFormsModule } from '@angular/forms';
+    import { HttpClientModule } from '@angular/common/http';
+    import { LoginService } from './ServiciosAPI/login.service';
+    ...
+    imports: [
+        CommonModule,    
+        MaterialModule,
+        ReactiveFormsModule,
+        HttpClientModule,
+        UsuariosModule,
+        CursosModule,
+        CoreRoutingModule,
+        StoreModule.forFeature(sesionUsuarioFeatureKey, reducer)
+        //EffectsModule.forFeature([SesionUsuarioEffects])
+    ],
+    providers:[LoginService,UsuarioService]     
+En el app.module.ts
+    imports: [
+        BrowserModule,    
+        BrowserAnimationsModule,
+        AppRoutingModule,
+        CoreModule,
+        StoreModule.forRoot({}, {}),
+        StoreDevtoolsModule.instrument({ maxAge: 25, logOnly: environment.production })
+    ],                 
+En al app.component.html dejar solo
+    <router-outlet></router-outlet>          
+
+En las clases del core implementar declarar las interfaces de las mismas (y hacer el implements)
+
+STATE (sesionUsuario)
+    actions
+            import { createAction, props } from '@ngrx/store';
+            import { iUsuario } from '../../Clases/usuario';
+
+            export const loadSesionUsuarios = createAction(
+            '[SesionUsuario] Load SesionUsuarios',
+            props<{ sesionUsuario: iUsuario }>()
+            );
+
+            export const clearSesionUsuarios = createAction(
+            '[SesionUsuario] Clear SesionUsuarios ',
+            );    
+    reducer
+            import { Action, createReducer, on } from '@ngrx/store';
+            import * as SesionUsuarioActions from './sesion-usuario.actions';
+            import { iUsuario, Usuario } from '../../Clases/usuario';
+
+            export const sesionUsuarioFeatureKey = 'sesionUsuario';
+
+            export interface State {
+            usuarioEnSesion:iUsuario
+            }
+
+            export const initialState: State = {
+            usuarioEnSesion : new Usuario(0,"","",new Date("01/01/1900"),0,"",0,"1","",0)
+            };
+
+            export const reducer = createReducer(
+            initialState,
+
+            on(SesionUsuarioActions.loadSesionUsuarios, (state, {sesionUsuario}) => {
+                // let objeto = estado;
+                    // objeto.cargando = true;
+                    // return objeto;
+                    // Son equivalentes con este codigo
+                // let obj= state;
+                // return obj;
+                console.log(sesionUsuario)
+                return {...state, usuarioEnSesion: sesionUsuario}
+            }),
+            on(SesionUsuarioActions.clearSesionUsuarios,(state) => {
+                return initialState;
+            })
+            );     
+    effects
+            comentar todo (por ahora)    
+    selector
+            import { createFeatureSelector, createSelector } from '@ngrx/store';
+            import * as fromSesionUsuario from './sesion-usuario.reducer';
+
+            export const selectSesionUsuarioState = createFeatureSelector<fromSesionUsuario.State>(
+            fromSesionUsuario.sesionUsuarioFeatureKey
+            );
+
+            export const selectSesionUsuario = createSelector(
+            selectSesionUsuarioState,
+            (state: fromSesionUsuario.State) => {
+                return state;
+            }
+            );         
+
+En el auth.guard.ts 
+    Agregar el constructor
+        private usuarioLogueado?: Usuario;
+        constructor(
+            private router:Router,
+            private store:Store)
+            {
+            this.store.select(selectSesionUsuario)
+            .subscribe(sesionUsuario=>{
+                console.log("suscripcion",sesionUsuario);
+                this.usuarioLogueado=sesionUsuario.usuarioEnSesion;
+            })
+            }    
+    En el canActivate
+            if (this.usuarioLogueado==undefined) {
+                return this.router.navigate(['login']);
+            }
+            if(this.usuarioLogueado?.id>0)
+            {
+                return true;
+            }
+            else{
+                return this.router.navigate(['login']);
+            }    
+
+ServiciosAPI/LoginService
+    Crear el archivo baseURL.ts con
+                        export const API_URL = 'https://62474c0a4bd12c92f4fe9e29.mockapi.io/';
+    Codigo del loginService.ts
+                        import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+                        import { Injectable } from '@angular/core';
+                        import { catchError, map, Observable, throwError } from 'rxjs';
+                        import { Usuario } from '../Clases/usuario';
+                        import { API_URL } from './baseURL';
+                        import { Store } from '@ngrx/store';
+                        import { loadSesionUsuarios, clearSesionUsuarios } from '../state/sesionUsuario/sesion-usuario.actions';
+
+
+                        @Injectable({
+                        providedIn: 'root'
+                        })
+                        export class LoginService {
+
+                        private usuarioLogueado?: Usuario;
+                        private sesionActiva = false;
+                        private rolActivo:number=0;
+
+                        constructor(
+                            private http:HttpClient,
+                            private store:Store
+                        ) { }
+
+                        private manejoError(error: HttpErrorResponse){
+                            if(error.error instanceof ErrorEvent){
+                            console.warn('Error en el frontend:', error.error.message)
+                            }else{
+                            console.warn('Error en el backend', error.status, error.message)
+                            }
+
+                            return throwError(() => 'Error de comunicación HTTP');
+                            
+                        }
+
+                        login(correo: string, contrasena: string):Observable<Usuario>{
+
+                        return this.http.get<Usuario[]>(`${API_URL}/usuario`).pipe(
+                            map((usuarios: Usuario[]) => {
+                            this.usuarioLogueado = usuarios.filter(usuario => usuario.correoElectronico === correo && usuario.pass === contrasena)[0]
+                            
+                            console.log("loginService.login",this.usuarioLogueado);
+                                this.store.dispatch(loadSesionUsuarios({sesionUsuario:this.usuarioLogueado}));
+                            return this.usuarioLogueado;
+                            })
+                        ).pipe(catchError(this.manejoError))
+                        };
+
+                        cerrarSesion(){
+                            
+                            this.usuarioLogueado = undefined;
+                            this.store.dispatch(clearSesionUsuarios());
+                            this.sesionActiva = false;
+                            this.rolActivo = 0;
+                        }
+
+                        obtenerUsuarioActual(){
+                            return this.usuarioLogueado;
+                        }
+
+                        obtenerSesionActiva(){
+                            return this.sesionActiva;
+                        }
+                        obtenerRolActivo(){
+                            return this.rolActivo;
+                        }
+                        }            
+ServiciosAPI/usuarios.ts
+                        import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+                        import { Injectable } from '@angular/core';
+                        import { catchError, Observable, throwError } from 'rxjs';
+                        import { Usuario } from '../Clases/usuario';
+                        import { API_URL } from './baseURL';
+
+                        @Injectable({
+                        providedIn: 'root'
+                        })
+                        export class UsuarioService {
+
+                        constructor(
+                            private http:HttpClient
+                        ) { }
+
+                        private manejoError(error: HttpErrorResponse){
+                            if(error.error instanceof ErrorEvent){
+                            console.warn('Error en el frontend:', error.error.message)
+                            }else{
+                            console.warn('Error en el backend', error.status, error.message)
+                            }
+
+                            return throwError(() => 'Error de comunicación HTTP');
+                            
+                        }
+                        getUsuarios():Observable<Usuario[]>{
+
+                            return this.http.get<Usuario[]>(`${API_URL}/usuario`).pipe(catchError(this.manejoError));    
+                            }
+                        }
+core/Material/material.module.ts
+                        import { NgModule } from '@angular/core';
+                        import { CommonModule } from '@angular/common';
+
+                        import {MatButtonModule} from '@angular/material/button';
+                        import { MatIconModule } from '@angular/material/icon';
+                        import { MatTableModule, MatTable } from '@angular/material/table';
+                        import {MatDialogModule} from '@angular/material/dialog';
+                        import {MatFormFieldModule} from '@angular/material/form-field';
+                        import { MatInputModule } from '@angular/material/input';
+                        import { MatSelectModule } from '@angular/material/select';
+                        import { MatDatepickerModule } from '@angular/material/datepicker';
+                        import { MatNativeDateModule} from '@angular/material/core';
+                        import { MatCardModule } from '@angular/material/card';
+                        import { MatPaginatorModule } from '@angular/material/paginator';
+                        import { MatListModule } from '@angular/material/list';
+
+                        @NgModule({
+                        declarations: [],
+                        imports: [
+                            CommonModule
+                        ],
+                        exports:[
+                            /* Modulos que se exportan para disponibilizarlos en el resto de la aplicación */
+                            MatButtonModule,
+                            MatIconModule,
+                            MatTableModule,
+                            MatDialogModule,
+                            MatFormFieldModule,
+                            MatInputModule,
+                            MatSelectModule,
+                            MatDatepickerModule,
+                            MatNativeDateModule,
+                            MatCardModule,
+                            MatListModule,
+                            MatPaginatorModule
+                        ]
+                        })
+                        export class MaterialModule { }
