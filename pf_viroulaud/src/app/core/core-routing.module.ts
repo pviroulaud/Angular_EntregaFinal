@@ -10,11 +10,12 @@ const routes: Routes = [
   {path: '', component: LoginComponent},
   {path: 'login', component: LoginComponent, pathMatch: 'full'},    
   
-  {path:'home' ,redirectTo:'/home/usuarios',pathMatch: 'full'},
+  {path:'home' ,redirectTo:'/home/usuarios/us',pathMatch: 'full'},
 
   {path: 'home', component: HomeComponent, canActivate: [AuthGuard],  
   children: [
-      {path:'usuarios', loadChildren: () => import('../features/usuarios/usuarios.module').then((m) => m.UsuariosModule)}
+      {path:'usuarios/:tipo', loadChildren: () => import('../features/usuarios/usuarios.module').then((m) => m.UsuariosModule)},
+      {path:'cursos', loadChildren: () => import('../features/cursos/cursos.module').then((m) => m.CursosModule)},
   ]}  
   ,
   {path: '**', component: NotFoundComponent, pathMatch: 'full'}

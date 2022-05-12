@@ -38,7 +38,7 @@ export class LoginService {
     map((usuarios: Usuario[]) => {
       this.usuarioLogueado = usuarios.filter(usuario => usuario.correoElectronico === correo && usuario.pass === contrasena)[0]
      
-      console.log("loginService.login",this.usuarioLogueado);
+      //console.log("loginService.login",this.usuarioLogueado);
         this.store.dispatch(loadSesionUsuarios({sesionUsuario:this.usuarioLogueado}));
       return this.usuarioLogueado;
     })

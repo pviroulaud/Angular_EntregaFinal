@@ -18,7 +18,7 @@ export class AuthGuard implements CanActivate, CanActivateChild, CanDeactivate<u
     {
       this.store.select(selectSesionUsuario)
       .subscribe(sesionUsuario=>{
-        console.log("suscripcion",sesionUsuario);
+
         this.usuarioLogueado=sesionUsuario.usuarioEnSesion;
       })
     }
@@ -26,6 +26,7 @@ export class AuthGuard implements CanActivate, CanActivateChild, CanDeactivate<u
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
+
       if (this.usuarioLogueado==undefined) {
         return this.router.navigate(['login']);
       }
@@ -40,7 +41,16 @@ export class AuthGuard implements CanActivate, CanActivateChild, CanDeactivate<u
   canActivateChild(
     childRoute: ActivatedRouteSnapshot,
     state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-    return true;
+      if (this.usuarioLogueado==undefined) {
+        return this.router.navigate(['login']);
+      }
+      if(this.usuarioLogueado?.id>0)
+      {
+        return true;
+      }
+      else{
+        return this.router.navigate(['login']);
+      }
   }
   canDeactivate(
     component: unknown,

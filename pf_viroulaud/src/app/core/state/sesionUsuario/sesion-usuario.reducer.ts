@@ -22,7 +22,7 @@ export const reducer = createReducer(
         // Son equivalentes con este codigo
     // let obj= state;
     // return obj;
-    console.log(sesionUsuario)
+    //console.log(sesionUsuario)
     return {...state, usuarioEnSesion: sesionUsuario}
   }),
   on(SesionUsuarioActions.clearSesionUsuarios,(state) => {

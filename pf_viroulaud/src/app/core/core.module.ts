@@ -19,6 +19,9 @@ import { LoginService } from './ServiciosAPI/login.service';
 //import { EffectsModule } from '@ngrx/effects';
 //import { SesionUsuarioEffects } from './state/sesionUsuario/sesion-usuario.effects';
 import { UsuarioService } from './ServiciosAPI/usuario.service';
+import { CursoService } from './ServiciosAPI/curso.service';
+import { RolesService } from './ServiciosAPI/roles.service';
+import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
   declarations: [
@@ -37,9 +40,10 @@ import { UsuarioService } from './ServiciosAPI/usuario.service';
     UsuariosModule,
     CursosModule,
     CoreRoutingModule,
+    SharedModule,
     StoreModule.forFeature(sesionUsuarioFeatureKey, reducer)
     //EffectsModule.forFeature([SesionUsuarioEffects])
   ],
-  providers:[LoginService,UsuarioService]
+  providers:[LoginService,UsuarioService,CursoService,RolesService]
 })
 export class CoreModule { }

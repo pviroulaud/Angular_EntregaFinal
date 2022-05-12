@@ -4,13 +4,13 @@ import { AuthGuard } from 'src/app/core/auth.guard';
 import { ListaUsuariosComponent } from './componentes/lista-usuarios/lista-usuarios.component';
 
 const routes: Routes = [
-
-  {path: '',component:ListaUsuariosComponent,canActivate: [AuthGuard],
-    children: [
-                {
-                  path:'lista', component:ListaUsuariosComponent,canActivate: [AuthGuard]
-                }
-              ]
+  
+  {path: '',component:ListaUsuariosComponent, //canActivate: [AuthGuard],
+    // children: [
+    //             {
+    //               path:'alumnos', component:ListaUsuariosComponent//,canActivate: [AuthGuard]
+    //             }
+    //           ]
   },
 ]
 
