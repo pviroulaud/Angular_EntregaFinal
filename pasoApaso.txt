@@ -129,9 +129,10 @@ En el core.module.ts
         MaterialModule,
         ReactiveFormsModule,
         HttpClientModule,
+		CoreRoutingModule,
         UsuariosModule,
         CursosModule,
-        CoreRoutingModule,
+        
         StoreModule.forFeature(sesionUsuarioFeatureKey, reducer)
         //EffectsModule.forFeature([SesionUsuarioEffects])
     ],
