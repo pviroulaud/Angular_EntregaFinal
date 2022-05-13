@@ -23,6 +23,7 @@ import { CursoService } from './ServiciosAPI/curso.service';
 import { RolesService } from './ServiciosAPI/roles.service';
 import { SharedModule } from '../shared/shared.module';
 
+
 @NgModule({
   declarations: [
     HomeComponent,
@@ -37,10 +38,11 @@ import { SharedModule } from '../shared/shared.module';
     MaterialModule,
     ReactiveFormsModule,
     HttpClientModule,
-    UsuariosModule,
-    CursosModule,
     CoreRoutingModule,
     SharedModule,
+    UsuariosModule,
+    CursosModule,
+    
     StoreModule.forFeature(sesionUsuarioFeatureKey, reducer)
     //EffectsModule.forFeature([SesionUsuarioEffects])
   ],
